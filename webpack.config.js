@@ -4,6 +4,13 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WebpackMd5Hash = require('webpack-md5-hash');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const cssLoaderAfterModules = require.resolve("./cssLoaderAfterModules");
+const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+
+var nib = require("nib");
+
+
 module.exports = {
     entry: { main: './src/index.js' },
     output: {
@@ -21,18 +28,45 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                use:  [  'style-loader', MiniCssExtractPlugin.loader, 'css-loader']
+                use:  [
+                    'style-loader',
+                    MiniCssExtractPlugin.loader,
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            afterModules: cssLoaderAfterModules,
+                            minimize: true
+                        }
+                    }
+                ]
             },
             {
                 test: /\.styl$/,
-                use:  [  'style-loader', MiniCssExtractPlugin.loader, 'css-loader', 'style-loader']
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            sourceMap: true,
+                            modules: true,
+                            localIdentName: '[path][name]---[local]---[hash:base64:5]',
+                            importLoaders: 2,
+                            minimize: true,
+                        }
+                    },
+                    'postcss-loader',
+                    {
+                        loader: 'stylus-loader',
+                        options: {
+                            use: [nib]
+                        }
+                    }
+                ]
             }
         ]
     },
     plugins: [
-        // new ExtractTextPlugin(
-        //   {filename: 'style.[hash].css', disable: false, allChunks: true }
-        // ),
+
         new MiniCssExtractPlugin({
             filename: 'style.[contenthash].css',
         }),
@@ -43,5 +77,31 @@ module.exports = {
             filename: 'index.html'
         }),
         new WebpackMd5Hash()
-    ]
+    ],
+
+    optimization: {
+        runtimeChunk: "multiple",
+        splitChunks: {
+            "chunks": "all"
+        },
+        minimize: true,
+        minimizer: [
+            new UglifyJsPlugin({
+                cache: true,
+                parallel: true,
+                sourceMap: true,
+                uglifyOptions: {
+                    mangle: true,
+                    sourceMap: true,
+                    output: {
+                        comments: false
+                    },
+                    compress: {
+                        warnings: false
+                    }
+                }
+            }),
+            new OptimizeCSSAssetsPlugin({}),
+        ]
+    },
 };
