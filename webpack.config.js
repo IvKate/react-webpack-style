@@ -54,7 +54,15 @@ module.exports = {
                             minimize: true,
                         }
                     },
-                    'postcss-loader',
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            plugins: {
+                                    'postcssPrependClassPlugin': {className: "#megaReact ._sc"}
+                                }
+                            }
+                        }
+                    },
                     {
                         loader: 'stylus-loader',
                         options: {

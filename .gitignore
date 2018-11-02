@@ -1,1 +1,10 @@
 # Created by .ignore support plugin (hsz.mobi)
+.DS_Store
+.babelrc
+.idea/inspectionProfiles/
+.idea/modules.xml
+.idea/react-webpack-style.iml
+.idea/vcs.xml
+.idea/workspace.xml
+dist/
+node_modules/
